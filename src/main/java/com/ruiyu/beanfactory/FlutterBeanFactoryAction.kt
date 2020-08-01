@@ -109,11 +109,11 @@ class FlutterBeanFactoryAction : AnAction() {
                     content.append("\n");
                     //_fromJsonSingle
                     content.append("  //Go back to a single instance by type\n" +
-                            "  static _fromJsonSingle(String type, json) {\n" +
+                            "  static _fromJsonSingle(Type type, json) {\n" +
                             "    switch (type) {")
                     allClass.forEach {
                         it.first.classes.forEach { itemFile ->
-                            content.append("\t\t\tcase '${itemFile.className}':\n")
+                            content.append("\t\t\tcase ${itemFile.className}:\n")
                             content.append("\t\t\treturn ${itemFile.className}().fromJson(json);")
                         }
                     }
@@ -123,34 +123,54 @@ class FlutterBeanFactoryAction : AnAction() {
 
                     //_getListFromType
                     content.append("\n\n");
-                    content.append("  //empty list is returned by type\n" +
-                            "  static _getListFromType(String type) {\n" +
-                            "    switch (type) {")
+                    val getList = """
+                         //empty list is returned by type
+                         static _getListFromType(Type type) {
+                            switch (type) {
+                            
+                    """.trimIndent()
+                    content.append(getList)
                     allClass.forEach {
                         it.first.classes.forEach { itemFile ->
-                            content.append("\t\t\tcase '${itemFile.className}':\n")
-                            content.append("\t\t\treturn List<${itemFile.className}>();")
+                            val newList = """
+                                        case ${itemFile.className}:return List<${itemFile.className}>();
+                                    
+                            """.trimIndent()
+                            content.append(newList)
                         }
                     }
-                    content.append("    }\n" +
-                            "    return null;\n" +
-                            "  }")
+                    content.append("""
+                            }
+                            return null;
+                        }
+                    """.trimIndent())
                     content.append("\n\n")
+                    val fromListJson = """
+                        static List<M> fromJsonAsList<M>(List<dynamic> json) {
+                            if (json.isEmpty) {
+                                return List<M>();
+                            }
+                            List tempList = _getListFromType(M);
+                            json.forEach((itemJson) {
+                                tempList.add(_fromJsonSingle(M, itemJson));
+                            });
+                            return tempList;
+                        }
+                        
+                        
+                    """.trimIndent()
+                    content.append(fromListJson)
+                    val fromJson = """
+                         static M fromJsonAsT<M>(json) {
+                           if (json is List) {
+                             return null;
+                           } else {
+                             return _fromJsonSingle(M, json) as M;
+                           }
+                         }
+                   """.trimIndent()
                     //fromJsonAsT
-                    content.append("  static M fromJsonAsT<M>(json) {\n" +
-                            "    String type = M.toString();\n" +
-                            "    if (json is List && type.contains(\"List<\")) {\n" +
-                            "      String itemType = type.substring(5, type.length - 1);\n" +
-                            "      List tempList = _getListFromType(itemType);\n" +
-                            "      json.forEach((itemJson) {\n" +
-                            "        tempList\n" +
-                            "            .add(_fromJsonSingle(type.substring(5, type.length - 1), itemJson));\n" +
-                            "      });\n" +
-                            "      return tempList as M;\n" +
-                            "    } else {\n" +
-                            "      return _fromJsonSingle(M.toString(), json) as M;\n" +
-                            "    }\n" +
-                            "  }")
+                    content.append(fromJson)
 
                     content.append("\n")
                     content.append("}")

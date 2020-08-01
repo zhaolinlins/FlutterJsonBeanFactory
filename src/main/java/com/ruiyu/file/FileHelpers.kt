@@ -255,11 +255,11 @@ object FileHelpers {
                                             val strs = itemFileNode.text.substringAfter(")").split(" ").filter { item ->
                                                 item != "\n" && item != "\t" && item.trim().trimIndent().isNotEmpty()
                                             }
-                                           val nameNode =  if(strs.contains("=")){
-                                                strs[strs.indexOf("=")-1]
-                                            }else {
-                                               strs.last().trimIndent().trim()
-                                           }
+                                            val nameNode = if (strs.contains("=")) {
+                                                strs[strs.indexOf("=") - 1]
+                                            } else {
+                                                strs.last().trimIndent().trim()
+                                            }
 //                                            if (strs.size == 2) {
 //                                                val typeNode = strs[strs.size - 2]
 //                                                val annotationValue = if (itemFileNode.text.contains("\"")) {
@@ -279,9 +279,8 @@ object FileHelpers {
                                                 val annotationValue: Any = when (val annotationValueOriginal = itemAnnotationString.substringAfter(":").trimIndent().trim()) {
                                                     "true" -> true
                                                     "false" -> false
-                                                    else -> annotationValueOriginal.replace("\"", "").replace("\'", "")
+                                                    else -> if (annotationNameOriginal == "format") annotationValueOriginal else annotationValueOriginal.replace("\"", "").replace("\'", "")
                                                 }
-
                                                 AnnotationValue(annotationNameOriginal, annotationValue)
                                             }
 //                                                val annotationValue = if (itemFileNode.text.contains("\"")) {

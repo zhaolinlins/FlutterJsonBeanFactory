@@ -68,7 +68,7 @@ class HelperClassGeneratorInfo {
                     }
                     type == "DateTime" -> {
                         if (filed.getValueByName<String>("format")?.isNotEmpty() == true) {
-                            "if(json['$getJsonName'] != null){\n\t\tDateFormat format = new DateFormat(\"${filed.getValueByName<String>("format")}\");\n\t\tdata.$name = format.parse(json['$getJsonName'].toString());\n\t}"
+                            "if(json['$getJsonName'] != null){\n\t\tDateFormat format = new DateFormat(${filed.getValueByName<String>("format")});\n\t\tdata.$name = format.parse(json['$getJsonName'].toString());\n\t}"
                         } else {
                             "if(json['$getJsonName'] != null){\n\t\tdata.$name = DateTime.tryParse(json['$getJsonName']);\n\t}"
                         }
@@ -86,7 +86,7 @@ class HelperClassGeneratorInfo {
                     "dynamic" -> "data.${name}.addAll(json['$getJsonName']);"
                     "DateTime" ->
                         if (filed.getValueByName<String>("format")?.isNotEmpty() == true) {
-                            "\n\t\tDateFormat format = new DateFormat(\"${filed.getValueByName<String>("format")}\");\n\t\t\t\t(json['$getJsonName'] as List).forEach((v) {\n\t\t\t\t\tif (v != null)\n\t\t\t\t\t\tdata.$name.add(format.parse(v.toString()));\n\t\t\t\t});".trimIndent()
+                            "\n\t\tDateFormat format = new DateFormat(${filed.getValueByName<String>("format")});\n\t\t\t\t(json['$getJsonName'] as List).forEach((v) {\n\t\t\t\t\tif (v != null)\n\t\t\t\t\t\tdata.$name.add(format.parse(v.toString()));\n\t\t\t\t});".trimIndent()
                         } else {
                             "(json['$getJsonName'] as List).forEach((v) {\n\t\t\tdata.$name.add(DateTime.parse(v));\n\t\t});".trimIndent()
                         }
@@ -134,7 +134,7 @@ class HelperClassGeneratorInfo {
                 if (type == "DateTime") {
                     return if (isContainsDateFormat) {
                         "if (${thisKey} != null) {\n" +
-                                "    DateFormat format = new DateFormat(\"$formatString\");\n" +
+                                "    DateFormat format = new DateFormat($formatString);\n" +
                                 "    data['${getJsonName}'] = format.format(${thisKey});\n" +
                                 "  }"
                     } else "data['${getJsonName}'] = ${thisKey}?.toString();"
@@ -158,7 +158,7 @@ class HelperClassGeneratorInfo {
                             "        .cast<String>()"
                 } else "$thisKey.map((v) => v.toJson()).toList()"
                 // class list
-                return "if ($thisKey != null) {${if (isListDateTime && isContainsDateFormat) "\n\t\tDateFormat format = new DateFormat(\"${formatString}\");" else ""}\n\t\tdata['$getJsonName'] =  $value;\n\t}"
+                return "if ($thisKey != null) {${if (isListDateTime && isContainsDateFormat) "\n\t\tDateFormat format = new DateFormat(${formatString});" else ""}\n\t\tdata['$getJsonName'] =  $value;\n\t}"
             }
             else -> {
                 // class
